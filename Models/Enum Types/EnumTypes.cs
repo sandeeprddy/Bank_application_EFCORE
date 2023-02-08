@@ -1,0 +1,23 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Models.Enum_Types
+{
+    public class EnumTypes
+    {
+        public enum TransactionTypes
+        {
+            RTGS,
+            IMPS
+        }
+
+        public enum UserTypes
+        {
+            Customer,
+            Staff
+        }
+    }
+}
