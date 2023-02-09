@@ -17,11 +17,13 @@ namespace Models
         public User User { get; set; }
 
 
-        public Account()
+        public Account(string userId)
         {
             this.Id =  DateTime.Now.ToString("");
             
             this.Balance = 0;
+
+            this.UserId = userId;
 
         }
 

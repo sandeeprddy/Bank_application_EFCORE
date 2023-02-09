@@ -26,8 +26,8 @@ namespace Bank_Application
 
             if (context.Users.Any(user => user.Id == customerID))
             {
-                User user = (User)(context.Users.Where(user => user.Id == customerID));
-                return (user.Password == password && user.UserType.Equals(EnumTypes.UserTypes.Customer));
+                List<User> users = (context.Users.Where(user => user.Id == customerID)).ToList();
+                return (users[0].Password == password && users[0].UserType.Equals(EnumTypes.UserTypes.Customer));
             }
             return false;
         }
@@ -38,8 +38,8 @@ namespace Bank_Application
 
             if (context.Accounts.Any(account => account.Id == accountId))
             {
-                Account account = (Account)(context.Accounts.Where(user => user.Id == accountId));
-                return (account.UserId == customerId);
+               List<Account> accounts = (context.Accounts.Where(user => user.Id == accountId)).ToList();
+                return (accounts[0].UserId == customerId);
             }
             return false;
         }
@@ -53,8 +53,8 @@ namespace Bank_Application
 
             if (context.Users.Any(user => user.Id == Id))
             {
-                User user = (User)(context.Users.Where(user => user.Id == Id));
-                return (user.Id == staffBankId && user.Password == password && user.UserType.Equals(EnumTypes.UserTypes.Staff));
+                List<User> users = (context.Users.Where(user => user.Id == Id)).ToList();
+                return (users[0].BankId == staffBankId && users[0].Password == password && users[0].UserType.Equals(EnumTypes.UserTypes.Staff));
             }
             return false;
         }

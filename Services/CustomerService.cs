@@ -11,8 +11,9 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-                Account account = (Account)context.Accounts.Where(account => account.Id == accountId);
-                account.Balance += money;
+                List<Account> account = context.Accounts.Where(account => account.Id == accountId).ToList();
+                account[0].Balance += money;
+                context.SaveChanges();
             }
         }
 
@@ -20,8 +21,9 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-                Account account = (Account)context.Accounts.Where(account => account.Id == accountId);
-                account.Balance -= money;
+                List<Account> account = context.Accounts.Where(account => account.Id == accountId).ToList();
+                account[0].Balance -= money;
+                context.SaveChanges();
             }
         }
 
@@ -29,8 +31,8 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-               Account account = (Account)context.Accounts.Where(account => account.Id == accountId);
-               return account.Balance;
+                List<Account> account = context.Accounts.Where(account => account.Id == accountId).ToList();
+                return account[0].Balance;
             }
         }
 
@@ -38,8 +40,7 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-               Currency currency = (Currency)context.Currencies.Where(currency => currency.Code == currencyCode);
-                return currency.ExchangeValue;
+               return (context.Currencies.Where(currency => currency.Code == currencyCode).ToList())[0].ExchangeValue;
             }
         }
 
@@ -93,7 +94,8 @@ namespace AllServices
                 CustomerService.Deposit(receiverAccountId, moneyToTransfer - transactionCharge);
                 
             }
-
+            CustomerService.GenerateTransactionInfo(senderAccountId, receiverAccountId, senderBankName, receiverBankName, (senderAccountAmountDebited - transactionCharge), receiverAccountAmountCredited);
+        
 
         }
 
@@ -110,8 +112,8 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-                Transaction transaction = (Transaction)context.Transactions.Where(transaction => transaction.Id == transactionId);
-                context.Transactions.Remove(transaction);
+                List<Transaction> transactions = context.Transactions.Where(transaction => transaction.Id == transactionId).ToList();
+                context.Transactions.Remove(transactions[0]);
                 context.SaveChanges();
             }
         }
@@ -124,18 +126,18 @@ namespace AllServices
             User sender = StaffService.GetCustomerFromAccountId(senderAccountId);
             User receiver = StaffService.GetCustomerFromAccountId(receiverAccountId);
 
-            string senderTransactionID = "TXN" + senderBank.Id + sender.Id + DateTime.Now.ToString("");
+            string senderTransactionID = "TXN" + senderBank.Id + senderAccountId + DateTime.Now.ToString("");
 
-            string receiverTransactionID = "TXN" + (receiverBank).Id + receiver.Id + DateTime.Now.ToString("");
+            string receiverTransactionID = "TXN" + (receiverBank).Id + receiverAccountId + DateTime.Now.ToString("");
 
             string senderTransactionInfo = sender.FirstName + " sent " + senderAccountAmountDebited + senderBank.Currency + " to " + receiver.FirstName;
 
             string receiverTransactionInfo = receiver.FirstName + " received " + receiverAccountAmountCredited + receiverBank.Currency + " from " + sender.FirstName;
 
 
-            Transaction senderTransaction = new(senderTransactionID, sender.Id, receiver.Id, senderAccountAmountDebited,senderTransactionInfo, receiverTransactionID, senderAccountId);
+            Transaction senderTransaction = new(senderTransactionID, senderAccountId, receiverAccountId, senderAccountAmountDebited,senderTransactionInfo, receiverTransactionID, senderAccountId);
 
-            Transaction receiverTransaction = new(receiverTransactionID, sender.Id, receiver.Id, receiverAccountAmountCredited, receiverTransactionInfo,senderTransactionID, receiverAccountId);
+            Transaction receiverTransaction = new(receiverTransactionID, senderAccountId, receiverAccountId, receiverAccountAmountCredited, receiverTransactionInfo,senderTransactionID, receiverAccountId);
 
             CustomerService.AddTransaction(senderTransaction);
             CustomerService.AddTransaction(receiverTransaction);

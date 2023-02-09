@@ -8,8 +8,6 @@ Console.WriteLine("Welcome..");
 
 Boolean isSessionComplete = false;
 
-DBEntitiesDefaultValues.InitializeDefaultValuesForCurrencies();
-
 while (!isSessionComplete)
 {
 
@@ -30,8 +28,8 @@ while (!isSessionComplete)
                 break;
             case "2":
                 Console.WriteLine("1.Admin\n2.Staff");
-                string staffRole = Console.ReadLine();
-                switch (staffRole)
+                string userRole = Console.ReadLine();
+                switch (userRole)
                 {
                     case "1":
                         Boolean validAdminCredentials = false;
@@ -296,7 +294,7 @@ void InputAndValidateBank(ref string BankName)
     {
         BankName = Console.ReadLine();
 
-        if (AdminServices.ValidateBankInDB(BankName))
+        if (AdminServices.ValidateBankInDB(BankName.ToUpper()))
         {
             BankName = BankName.ToUpper();
             isCorrectBank = true;
@@ -591,7 +589,7 @@ void InputAndValidateCustomer(string bankName,ref string customerId)
 
 void InputAndValidateAccountId(string customerId, ref string accountId)
 {
-    Console.WriteLine("Enter your account Id");
+    Console.WriteLine("Enter account Id");
 
     bool isCorrectAccount = false;
 
@@ -632,8 +630,6 @@ void TransferAmount(string senderAccountId)
     string receiversBankName = "";
 
     InputAndValidateBank(ref receiversBankName);
-
-    Console.WriteLine("Enter Receiver customer ID");
 
     string receiverCustomerID = "";
 
@@ -677,7 +673,6 @@ void TransferAmount(string senderAccountId)
     else
     {
         CustomerService.Transfer(senderAccountId,receiverAccountID,senderBankName,receiversBankName,moneyToTransfer, transactionCharge, senderAccountAmountDebited, ref receiverAccountAmountCredited);
-        CustomerService.GenerateTransactionInfo(senderAccountId, receiverAccountID, senderBankName, receiversBankName, (senderAccountAmountDebited - transactionCharge), receiverAccountAmountCredited);
     }
 
 }
@@ -946,7 +941,7 @@ void RevertTransaction(string senderAccountId)
         senderTransactionId = Console.ReadLine();
     }
 
-    float moneyTransferred = StaffService.GetMoneyTransferredInTransaction(senderAccountId);
+    float moneyTransferred = StaffService.GetMoneyTransferredInTransaction(senderTransactionId);
     
     CustomerService.Deposit(senderAccountId, moneyTransferred);
 
@@ -958,7 +953,7 @@ void RevertTransaction(string senderAccountId)
 
     moneyTransferred = StaffService.GetMoneyTransferredInTransaction(receiverTransactionId);
 
-    string receiverAccountId = StaffService.GetSenderAccountIdFromTransaction(receiverTransactionId);
+    string receiverAccountId = StaffService.GetReceiverAccountIdFromTransaction(receiverTransactionId);
 
     CustomerService.Withdraw(receiverAccountId, moneyTransferred);
 

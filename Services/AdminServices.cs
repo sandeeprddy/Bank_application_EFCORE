@@ -9,9 +9,9 @@ namespace AllServices
         {
             using BankDBContext context = new();
 
-            Bank bank = (Bank)context.Banks.Where(bank => bank.Id == bankId); 
+            List<Bank> banks = context.Banks.Where(bank => bank.Id == bankId).ToList();
 
-            bank.Currency = currencyCode;
+            banks[0].Currency = currencyCode;
 
             context.SaveChanges();
 
@@ -38,6 +38,22 @@ namespace AllServices
             using BankDBContext context = new();
             Bank newBank = new(name.ToUpper(), location);
             context.Banks.Add(newBank);
+
+            context.BankCurrencies.Add(new BankCurrency(newBank.Id,"INR"));
+            context.BankCurrencies.Add(new BankCurrency(newBank.Id, "EUR"));
+            context.BankCurrencies.Add(new BankCurrency(newBank.Id,"USD"));
+
+            context.SaveChanges();
+        }
+
+        public static void InitializeDefaultValuesForCurrencies()
+        {
+            using BankDBContext context = new();
+
+            context.Currencies.Add(new Currency("INR", 0));
+            context.Currencies.Add(new Currency("EUR", 90));
+            context.Currencies.Add(new Currency("USD", 80));
+
             context.SaveChanges();
         }
 
@@ -67,11 +83,12 @@ namespace AllServices
         public static List<string> GetAcceptedCurrencies(string bankId)
         {
 
-            Bank bank = GetBank(bankId);
-
+            
             using BankDBContext context = new();
 
-             return  (List<string>)(context.BankCurrencies.Where(a => a.BankId == bankId).Select(b => b.CurrencyCode));
+            /*List<Bank> banks = context.Banks.Where(bank => bank.Id == bankId).ToList();
+*/
+             return  (context.BankCurrencies.Where(a => a.BankId == bankId).Select(b => b.CurrencyCode)).ToList();
         }
        
         public static List<User> GetAllStaff(string bankName)
@@ -82,7 +99,7 @@ namespace AllServices
 
             BankDBContext context = new BankDBContext();
 
-            List<User> allStaff = (List<User>)context.Users.Where(user => (user.Id == bankId && user.UserType.Equals(Models.Enum_Types.EnumTypes.UserTypes.Staff)));
+            List<User> allStaff = context.Users.Where(user => (user.BankId == bankId && user.UserType.Equals(Models.Enum_Types.EnumTypes.UserTypes.Staff))).ToList() ;
 
             return allStaff;
 
@@ -91,13 +108,14 @@ namespace AllServices
         public static Bank GetBank(string bankName)
         {
             using BankDBContext context = new();
-            return (Bank)(context.Banks.Where(bank => bank.Name == bankName));
+            List<Bank> banks = (context.Banks.Where(bank => bank.Name == bankName.ToUpper())).ToList();
+            return banks[0];
         }
 
         public static User GetOneStaff(string staffId)
         {
             using BankDBContext context = new();
-            return (User)(context.Users.Where(user => user.Id == staffId));
+            return  ((context.Users.Where(user => user.Id == staffId)).ToList())[0];
         }
 
     }

@@ -21,7 +21,7 @@ namespace Models
         public string TransactionInfo { get; set; }
         
         [Required]
-        public string ReceiverTransactionID { get; set; }
+        public string ReceiverTransactionId { get; set; }
 
 
         [ForeignKey("Account")]
@@ -36,7 +36,7 @@ namespace Models
             this.ReceiverId = receiverId;
             this.MoneyTransferred = moneyTransferred;
             this.TransactionInfo = transactionInfo;
-            this.ReceiverTransactionID = receiverTransactionId;  
+            this.ReceiverTransactionId = receiverTransactionId;  
             this.AccountId = accountId;
         }
 

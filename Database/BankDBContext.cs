@@ -25,6 +25,12 @@ namespace DataAcessLayer
             modelBuilder.HasDefaultSchema("Bank");
 
             modelBuilder.Entity<Bank>().HasAlternateKey(bank => bank.Name);
+
+            modelBuilder.Entity<Bank>().Property(bank => bank.Id).ValueGeneratedNever();
+            modelBuilder.Entity<User>().Property(user => user.Id).ValueGeneratedNever();
+            modelBuilder.Entity<Account>().Property(account => account.Id).ValueGeneratedNever();
+            modelBuilder.Entity<Transaction>().Property(transaction => transaction.Id).ValueGeneratedNever();
+
         }
     }
 }

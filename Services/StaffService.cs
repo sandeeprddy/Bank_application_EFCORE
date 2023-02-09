@@ -17,7 +17,7 @@ namespace AllServices
 
             context.Users.Add(customer);
 
-            Account account = new();
+            Account account = new(customer.Id);
 
             context.Accounts.Add(account);
 
@@ -27,7 +27,7 @@ namespace AllServices
         public static void CreateAccountForExistingCustomer(string customerId)
         {
 
-            Account newAccount = new();
+            Account newAccount = new(customerId);
 
             newAccount.UserId = customerId;
 
@@ -43,9 +43,9 @@ namespace AllServices
         { 
             using BankDBContext context = new();
 
-            User user = (User)context.Users.Where(user => user.Id == customerId);
-         
-            user.FirstName = name;
+            List<User> users = context.Users.Where(user => user.Id == customerId).ToList();
+
+            users[0].FirstName = name;
 
         }
 
@@ -53,9 +53,9 @@ namespace AllServices
         {
             using BankDBContext context = new();
 
-            User user = (User)context.Users.Where(user => user.Id == customerId);
+            List<User> users = context.Users.Where(user => user.Id == customerId).ToList();
 
-            user.LastName = name;
+            users[0].LastName = name;
 
         }
 
@@ -63,9 +63,9 @@ namespace AllServices
         {
             using BankDBContext context = new();
 
-            User user = (User)context.Users.Where(user => user.Id == customerId);
+            List<User> users = context.Users.Where(user => user.Id == customerId).ToList();
 
-            user.Email = email;
+            users[0].Email = email;
 
         }
 
@@ -73,9 +73,9 @@ namespace AllServices
         {
             using BankDBContext context = new();
 
-            User user = (User)context.Users.Where(user => user.Id == customerId);
+            List<User> users = context.Users.Where(user => user.Id == customerId).ToList();
 
-            user.Password = password;
+            users[0].Password = password;
 
         }
 
@@ -83,16 +83,16 @@ namespace AllServices
         {
             using BankDBContext context = new();
 
-            User user = (User)context.Users.Where(user => user.Id == customerId);
+            List<User> users = context.Users.Where(user => user.Id == customerId).ToList();
 
-            List<Account> accounts = (List<Account>)context.Accounts.Where(account => account.UserId == customerId);
+            List<Account> accounts = context.Accounts.Where(account => account.UserId == customerId).ToList();
 
             foreach (Account account in accounts)
             {
                 context.Accounts.Remove(account);
             }
 
-            context.Users.Remove(user);
+            context.Users.Remove(users[0]);
 
             context.SaveChanges();
         }
@@ -100,41 +100,41 @@ namespace AllServices
         public static void DeleteAccount(string accountIDToDelete)
         {
             using BankDBContext context = new();
-            Account account = (Account)context.Accounts.Where(account => account.Id == accountIDToDelete);
-            context.Accounts.Remove(account);  
+            List<Account> accounts = context.Accounts.Where(account => account.Id == accountIDToDelete).ToList();
+            context.Accounts.Remove(accounts[0]);  
         }
 
         public static void AddServiceChargeForTransferringBank(string bankName, float updatedRTGSChargeToOtherBank, float updatedIMPSChargeToOtherBank)
         {
             using BankDBContext context = new BankDBContext();
-            Bank bank = (Bank)context.Banks.Where(bank => bank.Name == bankName);
-            bank.TransferRTGSCharge = updatedRTGSChargeToOtherBank;
-            bank.TransferRTGSCharge = updatedIMPSChargeToOtherBank;
+            List<Bank> banks = context.Banks.Where(bank => bank.Name == bankName).ToList();
+            banks[0].TransferRTGSCharge = updatedRTGSChargeToOtherBank;
+            banks[0].TransferRTGSCharge = updatedIMPSChargeToOtherBank;
         }
 
         public static float GetMoneyTransferredInTransaction(string transactionId)
         {
             using BankDBContext context = new();
 
-            Transaction transaction = (Transaction)context.Transactions.Where(transaction => transaction.Id == transactionId);
+            List<Transaction> transactions = context.Transactions.Where(transaction => transaction.Id == transactionId).ToList();
 
-            return transaction.MoneyTransferred;
+            return transactions[0].MoneyTransferred;
 
         }
 
         public static void AddServiceChargeForSameBank(string bankName, float updatedRTGSCharge, float updatedIMPSCharge)
         {
             using BankDBContext context = new BankDBContext();
-            Bank bank = (Bank)context.Banks.Where(bank => bank.Name == bankName);
-            bank.RTGSCharge = updatedRTGSCharge;
-            bank.IMPSCharge = updatedIMPSCharge;
+            List<Bank> banks = context.Banks.Where(bank => bank.Name == bankName).ToList();
+            banks[0].RTGSCharge = updatedRTGSCharge;
+            banks[0].IMPSCharge = updatedIMPSCharge;
         }
 
         public static List<Transaction> GetTransaction(string accountId)
         {
             using BankDBContext context = new();
 
-           List<Transaction> transactions = (List<Transaction>)context.Transactions.Where(transaction => transaction.AccountId == accountId);
+           List<Transaction> transactions = context.Transactions.Where(transaction => transaction.AccountId == accountId).ToList();
 
             return transactions;
         }
@@ -143,17 +143,17 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-                Transaction transaction = (Transaction)context.Transactions.Where(transaction => transaction.Id == transactionId);
-                return (string)transaction.ReceiverTransactionID;
+                List<Transaction> transactions = context.Transactions.Where(transaction => transaction.Id == transactionId).ToList();
+                return (transactions[0].ReceiverTransactionId);
             }
         }
 
-        public static string GetSenderAccountIdFromTransaction(string transactionId)
+        public static string GetReceiverAccountIdFromTransaction(string transactionId)
         {
             using (var context = new BankDBContext())
             {
-               Transaction transaction = (Transaction)context.Transactions.Where(transaction => transaction.Id == transactionId);
-                return transaction.SenderId;
+               List<Transaction> transactions = context.Transactions.Where(transaction => transaction.Id == transactionId).ToList();
+                return transactions[0].ReceiverId;
             }
         }
 
@@ -162,7 +162,7 @@ namespace AllServices
             using (var context = new BankDBContext())
             {
                 string bankId = (AdminServices.GetBank(bankName)).Id;
-                List<User> allCustomers = (List<User>)context.Users.Where(customer => (customer.BankId == bankId && customer.UserType.Equals(Models.Enum_Types.EnumTypes.UserTypes.Customer)));
+                List<User> allCustomers = context.Users.Where(customer => (customer.BankId == bankId && customer.UserType.Equals(Models.Enum_Types.EnumTypes.UserTypes.Customer))).ToList();
                 return allCustomers;   
             }
         }
@@ -171,7 +171,7 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-                List<Account> allAccounts = (List<Account>)context.Accounts.Where(account => (account.UserId == customerId));
+                List<Account> allAccounts = context.Accounts.Where(account => (account.UserId == customerId)).ToList();
                 return allAccounts;
             }
         }
@@ -180,13 +180,14 @@ namespace AllServices
         {
             using (var context = new BankDBContext())
             {
-              Account account = (Account)context.Accounts.Where(account => account.Id == accountId);
+              List<Account> accounts = context.Accounts.Where(account => account.Id == accountId).ToList();
 
-              User customer = (User)context.Users.Where(user => user.Id == account.UserId);
 
-                Bank bank = AdminServices.GetBank(customer.BankId);
+              List<User> customers = context.Users.Where(user => user.Id == accounts[0].UserId).ToList();
 
-                return bank.Name;
+                List<Bank> banks = context.Banks.Where(bank => bank.Id == (customers[0].BankId)).ToList();
+
+                return banks[0].Name;
 
             }
              
@@ -243,9 +244,9 @@ namespace AllServices
 
             using (var context = new BankDBContext())
             {
-                Account account = (Account)context.Accounts.Where(account => account.Id == accountId);
-                User customer = (User)context.Users.Where(user => user.Id == account.UserId);
-                return customer;
+                List<Account> accounts = context.Accounts.Where(account => account.Id == accountId).ToList();
+                List<User> customers = context.Users.Where(user => user.Id == accounts[0].UserId).ToList();
+                return customers[0];
             }
 
         }
